@@ -1,6 +1,6 @@
 [package]
 name = "parallel-stream"
-version = "1.0.1"
+version = "2.0.0"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/async-rs/parallel-stream"
 documentation = "https://docs.rs/parallel-stream"
