@@ -3,6 +3,8 @@ use async_std::task::{Context, Poll};
 
 use std::pin::Pin;
 
+use crate::FromParallelStream;
+
 pub use for_each::ForEach;
 pub use map::Map;
 pub use next::NextFuture;
@@ -59,5 +61,18 @@ pub trait ParallelStream: Sized + Send + Sync + Unpin + 'static {
         Fut: Future<Output = ()> + Send,
     {
         ForEach::new(self, f)
+    }
+
+    /// Transforms a stream into a collection.
+    ///
+    ///`collect()` can take anything streamable, and turn it into a relevant
+    /// collection. This is one of the more powerful methods in the async
+    /// standard library, used in a variety of contexts.
+    fn collect<'a, B>(self) -> Pin<Box<dyn Future<Output = B> + 'a + Send>>
+    where
+        Self: Sized + 'a,
+        B: FromParallelStream<Self::Item>,
+    {
+        FromParallelStream::from_par_stream(self)
     }
 }

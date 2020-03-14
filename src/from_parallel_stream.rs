@@ -6,11 +6,9 @@ use crate::IntoParallelStream;
 /// Conversion from a `ParallelStream`.
 pub trait FromParallelStream<T: Send> {
     /// Creates a value from a stream.
-    fn from_par_stream<'a, S: IntoParallelStream<Item = T> + 'a>(
-        stream: S,
-    ) -> Pin<Box<dyn Future<Output = Self> + 'a + Send>>
+    fn from_par_stream<'a, S>(stream: S) -> Pin<Box<dyn Future<Output = Self> + 'a + Send>>
     where
-        S: Send;
+        S: IntoParallelStream<Item = T> + 'a + Send;
 }
 
 #[async_std::test]
