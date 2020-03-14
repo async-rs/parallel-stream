@@ -27,7 +27,7 @@ impl<T: Send + 'static> Map<T> {
         Fut: Future<Output = T> + Send,
     {
         let (sender, receiver) = sync::channel(1);
-        let limit = stream.limit();
+        let limit = stream.get_limit();
         task::spawn(async move {
             while let Some(item) = stream.next().await {
                 let sender = sender.clone();
@@ -49,12 +49,12 @@ impl<T: Send + 'static> ParallelStream for Map<T> {
         this.receiver.poll_next(cx)
     }
 
-    fn set_limit(mut self, limit: impl Into<Option<usize>>) -> Self {
+    fn limit(mut self, limit: impl Into<Option<usize>>) -> Self {
         self.limit = limit.into();
         self
     }
 
-    fn limit(&self) -> Option<usize> {
+    fn get_limit(&self) -> Option<usize> {
         self.limit
     }
 }

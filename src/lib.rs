@@ -56,3 +56,5 @@ pub use par_stream::{ForEach, Map, NextFuture, ParallelStream, Take};
 
 pub mod prelude;
 pub mod vec;
+
+pub(crate) mod utils;

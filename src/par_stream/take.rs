@@ -26,7 +26,7 @@ pin_project! {
 impl<S: ParallelStream> Take<S> {
     pub(super) fn new(stream: S, remaining: usize) -> Self {
         Self {
-            limit: stream.limit(),
+            limit: stream.get_limit(),
             remaining,
             stream,
         }
@@ -50,12 +50,12 @@ impl<S: ParallelStream> ParallelStream for Take<S> {
         }
     }
 
-    fn set_limit(mut self, limit: impl Into<Option<usize>>) -> Self {
+    fn limit(mut self, limit: impl Into<Option<usize>>) -> Self {
         self.limit = limit.into();
         self
     }
 
-    fn limit(&self) -> Option<usize> {
+    fn get_limit(&self) -> Option<usize> {
         self.limit
     }
 }

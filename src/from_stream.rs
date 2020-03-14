@@ -43,12 +43,12 @@ where
         this.stream.poll_next(cx)
     }
 
-    fn set_limit(mut self, limit: impl Into<Option<usize>>) -> Self {
+    fn limit(mut self, limit: impl Into<Option<usize>>) -> Self {
         self.limit = limit.into();
         self
     }
 
-    fn limit(&self) -> Option<usize> {
+    fn get_limit(&self) -> Option<usize> {
         self.limit
     }
 }

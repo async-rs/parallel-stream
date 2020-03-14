@@ -19,8 +19,6 @@ pin_project_lite::pin_project! {
         exhausted: Arc<AtomicBool>,
         // Count how many tasks are executing.
         ref_count: Arc<AtomicU64>,
-        // Max concurrency limit.
-        limit: Option<usize>,
     }
 }
 
@@ -35,13 +33,13 @@ impl ForEach {
         let exhausted = Arc::new(AtomicBool::new(false));
         let ref_count = Arc::new(AtomicU64::new(0));
         let (sender, receiver): (Sender<()>, Receiver<()>) = sync::channel(1);
+        let _limit = stream.get_limit();
 
         // Initialize the return type here to prevent borrowing issues.
         let this = Self {
             receiver,
             exhausted: exhausted.clone(),
             ref_count: ref_count.clone(),
-            limit: stream.limit(),
         };
 
         task::spawn(async move {
