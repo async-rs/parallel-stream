@@ -1,0 +1,21 @@
+[package]
+name = "parallel-stream"
+version = "1.0.0"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/async-rs/parallel-stream"
+documentation = "https://docs.rs/parallel-stream"
+description = "Parallel async rust iterators"
+readme = "README.md"
+edition = "2018"
+keywords = []
+categories = []
+authors = [
+    "Yoshua Wuyts <yoshuawuyts@gmail.com>"
+]
+
+[features]
+
+[dependencies]
+async-std = { version = "1.5.0", features = ["attributes", "unstable"] }
+
+[dev-dependencies]
