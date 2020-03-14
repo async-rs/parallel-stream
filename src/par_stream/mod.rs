@@ -3,10 +3,15 @@ use async_std::task::{Context, Poll};
 
 use std::pin::Pin;
 
-use crate::ForEach;
-use crate::Map;
-use crate::NextFuture;
-use crate::Take;
+pub use for_each::ForEach;
+pub use map::Map;
+pub use next::NextFuture;
+pub use take::Take;
+
+mod for_each;
+mod map;
+mod next;
+mod take;
 
 /// Parallel version of the standard `Stream` trait.
 pub trait ParallelStream: Sized + Send + Sync + Unpin + 'static {
