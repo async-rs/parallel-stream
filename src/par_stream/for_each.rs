@@ -19,12 +19,14 @@ pin_project_lite::pin_project! {
         exhausted: Arc<AtomicBool>,
         // Count how many tasks are executing.
         ref_count: Arc<AtomicU64>,
+        // Max concurrency limit.
+        limit: Option<usize>,
     }
 }
 
 impl ForEach {
     /// Create a new instance of `ForEach`.
-    pub fn new<S, F, Fut>(mut input: S, mut f: F) -> Self
+    pub fn new<S, F, Fut>(mut stream: S, mut f: F) -> Self
     where
         S: ParallelStream,
         F: FnMut(S::Item) -> Fut + Send + Sync + Copy + 'static,
@@ -39,10 +41,11 @@ impl ForEach {
             receiver,
             exhausted: exhausted.clone(),
             ref_count: ref_count.clone(),
+            limit: stream.limit(),
         };
 
         task::spawn(async move {
-            while let Some(item) = input.next().await {
+            while let Some(item) = stream.next().await {
                 let sender = sender.clone();
                 let exhausted = exhausted.clone();
                 let ref_count = ref_count.clone();

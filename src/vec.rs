@@ -17,6 +17,7 @@ pin_project_lite::pin_project! {
     pub struct IntoParStream<T> {
         #[pin]
         stream: FromStream<FromIter<vec::IntoIter<T>>>,
+        limit: Option<usize>,
     }
 }
 
@@ -25,6 +26,15 @@ impl<T: Send + Sync + 'static> ParallelStream for IntoParStream<T> {
     fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         let this = self.project();
         this.stream.poll_next(cx)
+    }
+
+    fn set_limit(mut self, limit: impl Into<Option<usize>>) -> Self {
+        self.limit = limit.into();
+        self
+    }
+
+    fn limit(&self) -> Option<usize> {
+        self.limit
     }
 }
 
@@ -36,6 +46,7 @@ impl<T: Send + Sync + 'static> IntoParallelStream for Vec<T> {
     fn into_par_stream(self) -> Self::IntoParStream {
         IntoParStream {
             stream: from_stream(from_iter(self)),
+            limit: None,
         }
     }
 }

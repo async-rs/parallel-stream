@@ -17,14 +17,19 @@ pin_project! {
     #[derive(Clone, Debug)]
     pub struct Take<S> {
         #[pin]
-        pub(crate) stream: S,
-        pub(crate) remaining: usize,
+        stream: S,
+        remaining: usize,
+        limit: Option<usize>,
     }
 }
 
-impl<S> Take<S> {
+impl<S: ParallelStream> Take<S> {
     pub(super) fn new(stream: S, remaining: usize) -> Self {
-        Self { stream, remaining }
+        Self {
+            limit: stream.limit(),
+            remaining,
+            stream,
+        }
     }
 }
 
@@ -43,5 +48,14 @@ impl<S: ParallelStream> ParallelStream for Take<S> {
             }
             Poll::Ready(next)
         }
+    }
+
+    fn set_limit(mut self, limit: impl Into<Option<usize>>) -> Self {
+        self.limit = limit.into();
+        self
+    }
+
+    fn limit(&self) -> Option<usize> {
+        self.limit
     }
 }
