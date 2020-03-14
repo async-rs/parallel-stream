@@ -6,6 +6,7 @@ use std::pin::Pin;
 use crate::ForEach;
 use crate::Map;
 use crate::NextFuture;
+use crate::Take;
 
 /// Parallel version of the standard `Stream` trait.
 pub trait ParallelStream: Sized + Send + Sync + Unpin + 'static {
@@ -30,6 +31,14 @@ pub trait ParallelStream: Sized + Send + Sync + Unpin + 'static {
     /// stream with the results.
     fn next(&mut self) -> NextFuture<'_, Self> {
         NextFuture::new(self)
+    }
+
+    /// Creates a stream that yields its first `n` elements.
+    fn take(self, n: usize) -> Take<Self>
+    where
+        Self: Sized,
+    {
+        Take::new(self, n)
     }
 
     /// Applies `f` to each item of this stream in parallel.

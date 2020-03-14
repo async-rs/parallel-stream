@@ -14,8 +14,10 @@ mod for_each;
 mod map;
 mod next;
 mod parallel_stream;
+mod take;
 
 pub use for_each::ForEach;
 pub use map::Map;
 pub use next::NextFuture;
 pub use parallel_stream::ParallelStream;
+pub use take::Take;
