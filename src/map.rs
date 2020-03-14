@@ -42,15 +42,20 @@ impl<T: Send + 'static> Map<T> {
 impl<T: Send + 'static> ParallelStream for Map<T> {
     type Item = T;
     fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
-        use async_std::stream::Stream;
+        use async_std::prelude::*;
         let this = self.project();
         this.receiver.poll_next(cx)
     }
 }
 
-// #[async_std::test]
-// async fn smoke() {
-//     let s = async_std::stream::repeat(5usize).take(3);
-//     let v: Vec<usize> = Map::new(s, |n| async move { n * 2 }).collect().await;
-//     assert_eq!(v, vec![10usize; 3]);
-// }
+#[async_std::test]
+async fn smoke() {
+    use async_std::prelude::*;
+    let s = async_std::stream::repeat(5usize).take(3);
+    let mut output = vec![];
+    let mut stream = crate::from_stream(s).map(|n| async move { n * 2 });
+    while let Some(n) = stream.next().await {
+        output.push(n);
+    }
+    assert_eq!(output, vec![10usize; 3]);
+}

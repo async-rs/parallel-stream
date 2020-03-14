@@ -42,7 +42,7 @@ pub trait ParallelStream: Sized + Send + Sync + Unpin + 'static {
     }
 
     /// Applies `f` to each item of this stream in parallel.
-    fn for_each<F, T, Fut>(self, f: F) -> ForEach
+    fn for_each<F, Fut>(self, f: F) -> ForEach
     where
         F: FnMut(Self::Item) -> Fut + Send + Sync + Copy + 'static,
         Fut: Future<Output = ()> + Send,

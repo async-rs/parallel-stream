@@ -79,12 +79,14 @@ impl Future for ForEach {
     }
 }
 
-// #[async_std::test]
-// async fn smoke() {
-//     let s = async_std::stream::repeat(5usize).take(3);
-//     ForEach::new(s, |n| async move {
-//         // TODO: assert that this is called 3 times.
-//         dbg!(n);
-//     })
-//     .await;
-// }
+#[async_std::test]
+async fn smoke() {
+    let s = async_std::stream::repeat(5usize);
+    crate::from_stream(s)
+        .take(3)
+        .for_each(|n| async move {
+            // TODO: assert that this is called 3 times.
+            dbg!(n);
+        })
+        .await;
+}
