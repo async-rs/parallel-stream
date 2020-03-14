@@ -24,7 +24,7 @@ pin_project_lite::pin_project! {
 
 impl ForEach {
     /// Create a new instance of `ForEach`.
-    pub fn new<S, F, Fut>(mut input: S, mut f: F) -> Self
+    pub fn new<S, F, Fut>(mut stream: S, mut f: F) -> Self
     where
         S: ParallelStream,
         F: FnMut(S::Item) -> Fut + Send + Sync + Copy + 'static,
@@ -33,6 +33,7 @@ impl ForEach {
         let exhausted = Arc::new(AtomicBool::new(false));
         let ref_count = Arc::new(AtomicU64::new(0));
         let (sender, receiver): (Sender<()>, Receiver<()>) = sync::channel(1);
+        let _limit = stream.get_limit();
 
         // Initialize the return type here to prevent borrowing issues.
         let this = Self {
@@ -42,7 +43,7 @@ impl ForEach {
         };
 
         task::spawn(async move {
-            while let Some(item) = input.next().await {
+            while let Some(item) = stream.next().await {
                 let sender = sender.clone();
                 let exhausted = exhausted.clone();
                 let ref_count = ref_count.clone();

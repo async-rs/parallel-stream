@@ -21,6 +21,12 @@ pub trait ParallelStream: Sized + Send + Sync + Unpin + 'static {
     /// Attempts to receive the next item from the stream.
     fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>>;
 
+    /// Set a max concurrency limit
+    fn limit(self, limit: impl Into<Option<usize>>) -> Self;
+
+    /// Get the max concurrency limit
+    fn get_limit(&self) -> Option<usize>;
+
     /// Applies `f` to each item of this stream in parallel, producing a new
     /// stream with the results.
     fn map<F, T, Fut>(self, f: F) -> Map<T>

@@ -17,6 +17,7 @@ pin_project! {
     pub struct FromStream<S> {
         #[pin]
         stream: S,
+        limit: Option<usize>,
     }
 }
 
@@ -26,6 +27,7 @@ where
     S: Send + Sync,
 {
     FromStream {
+        limit: None,
         stream: stream.into_stream(),
     }
 }
@@ -39,5 +41,14 @@ where
     fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         let this = self.project();
         this.stream.poll_next(cx)
+    }
+
+    fn limit(mut self, limit: impl Into<Option<usize>>) -> Self {
+        self.limit = limit.into();
+        self
+    }
+
+    fn get_limit(&self) -> Option<usize> {
+        self.limit
     }
 }

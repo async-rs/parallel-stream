@@ -14,6 +14,7 @@ pin_project_lite::pin_project! {
     pub struct Map<T> {
         #[pin]
         receiver: Receiver<T>,
+        limit: Option<usize>,
     }
 }
 
@@ -26,6 +27,7 @@ impl<T: Send + 'static> Map<T> {
         Fut: Future<Output = T> + Send,
     {
         let (sender, receiver) = sync::channel(1);
+        let limit = stream.get_limit();
         task::spawn(async move {
             while let Some(item) = stream.next().await {
                 let sender = sender.clone();
@@ -35,7 +37,7 @@ impl<T: Send + 'static> Map<T> {
                 });
             }
         });
-        Map { receiver }
+        Map { receiver, limit }
     }
 }
 
@@ -45,6 +47,15 @@ impl<T: Send + 'static> ParallelStream for Map<T> {
         use async_std::prelude::*;
         let this = self.project();
         this.receiver.poll_next(cx)
+    }
+
+    fn limit(mut self, limit: impl Into<Option<usize>>) -> Self {
+        self.limit = limit.into();
+        self
+    }
+
+    fn get_limit(&self) -> Option<usize> {
+        self.limit
     }
 }
 
