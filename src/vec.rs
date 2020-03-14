@@ -66,11 +66,11 @@ impl<T: Send + Sync + 'static> IntoParallelStream for Vec<T> {
 ///     res.sort();
 ///     assert_eq!(res, vec![1, 4, 9, 16]);
 /// }
-///
+/// ```
 impl<T: Send> FromParallelStream<T> for Vec<T> {
-    fn from_par_stream<'a, S>(stream: S) -> Pin<Box<dyn Future<Output = Self> + 'a>>
+    fn from_par_stream<'a, S>(stream: S) -> Pin<Box<dyn Future<Output = Self> + 'a + Send>>
     where
-        S: IntoParallelStream<Item = T> + 'a,
+        S: IntoParallelStream<Item = T> + Send + 'a,
     {
         Box::pin(async move {
             let mut stream = stream.into_par_stream();
