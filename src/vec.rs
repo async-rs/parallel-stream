@@ -39,3 +39,19 @@ impl<T: Send + Sync + 'static> IntoParallelStream for Vec<T> {
         }
     }
 }
+
+#[async_std::test]
+async fn smoke() {
+    use crate::IntoParallelStream;
+
+    let v = vec![1, 2, 3, 4];
+    let mut stream = v.into_par_stream().map(|n| async move { n * n });
+
+    let mut out = vec![];
+    while let Some(n) = stream.next().await {
+        out.push(n);
+    }
+    out.sort();
+
+    assert_eq!(out, vec![1usize, 4, 9, 16]);
+}
