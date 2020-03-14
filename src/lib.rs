@@ -11,12 +11,14 @@
 #![warn(missing_docs, missing_doc_code_examples, unreachable_pub)]
 
 mod for_each;
+mod from_stream;
 mod map;
 mod next;
 mod parallel_stream;
 mod take;
 
 pub use for_each::ForEach;
+pub use from_stream::{from_stream, FromStream};
 pub use map::Map;
 pub use next::NextFuture;
 pub use parallel_stream::ParallelStream;
