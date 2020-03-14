@@ -17,3 +17,5 @@ mod par_stream;
 pub use from_stream::{from_stream, FromStream};
 pub use into_parallel_stream::IntoParallelStream;
 pub use par_stream::{ForEach, Map, NextFuture, ParallelStream, Take};
+
+pub mod vec;
