@@ -1,4 +1,26 @@
-//! Parallel async rust iterators
+//! Data parallelism library for async-std.
+//!
+//! This library provides convenient parallel iteration of
+//! [`Streams`](https://docs.rs/futures-core). Analogous to how
+//! [Rayon](https://docs.rs/rayon/) provides parallel iteration of
+//! `Iterator`s. This allows processing data coming from a stream in parallel,
+//! enabling use of *all* system resources.
+//!
+//! You can read about the design decisions and motivation in the "parallel
+//! streams" section of the ["streams
+//! concurrency"](https://blog.yoshuawuyts.com/streams-concurrency/#parallel-streams)
+//! blog post.
+//!
+//! # Differences with Rayon
+//!
+//! Rayon is a data parallelism library built for synchronous Rust, powered by
+//! an underlying thread pool. async-std manages a thread pool as well, but the
+//! key difference with Rayon is that async-std (and futures) are optimized for
+//! *latency*, while Rayon is optimized for *throughput*.
+//!
+//! As a rule of thumb: if you want to speed up doing heavy calculations you
+//! probably want to use Rayon. If you want to parallelize network requests
+//! consider using `parallel-stream`.
 //!
 //! # Examples
 //!
