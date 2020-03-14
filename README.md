@@ -1,7 +1,7 @@
 <h1 align="center">parallel-stream</h1>
 <div align="center">
   <strong>
-    Parallel async streams
+    Data parallelism library for async-std.
   </strong>
 </div>
 
