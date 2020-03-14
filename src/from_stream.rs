@@ -7,7 +7,7 @@ use pin_project_lite::pin_project;
 use crate::ParallelStream;
 
 pin_project! {
-    /// A parallel stream that was created from stream.
+    /// A parallel stream that was created from sequential stream.
     ///
     /// This stream is created by the [`from_stream`] function.
     /// See it documentation for more.
