@@ -5,11 +5,13 @@ use std::pin::Pin;
 
 use crate::FromParallelStream;
 
+pub use count::Count;
 pub use for_each::ForEach;
 pub use map::Map;
 pub use next::NextFuture;
 pub use take::Take;
 
+mod count;
 mod for_each;
 mod map;
 mod next;
@@ -28,6 +30,11 @@ pub trait ParallelStream: Sized + Send + Sync + Unpin + 'static {
 
     /// Get the max concurrency limit
     fn get_limit(&self) -> Option<usize>;
+
+    /// Counts the number of items of this stream.
+    fn count(self) -> Count<Self> {
+        Count::new(self)
+    }
 
     /// Applies `f` to each item of this stream in parallel, producing a new
     /// stream with the results.
