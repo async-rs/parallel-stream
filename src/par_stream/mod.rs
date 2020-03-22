@@ -3,17 +3,21 @@ use async_std::task::{Context, Poll};
 
 use std::pin::Pin;
 
-use crate::FromParallelStream;
+use crate::{FromParallelStream, IntoParallelStream};
 
+pub use enumerate::Enumerate;
 pub use for_each::ForEach;
 pub use map::Map;
 pub use next::NextFuture;
 pub use take::Take;
+pub use zip::Zip;
 
+mod enumerate;
 mod for_each;
 mod map;
 mod next;
 mod take;
+mod zip;
 
 /// Parallel version of the standard `Stream` trait.
 pub trait ParallelStream: Sized + Send + Sync + Unpin + 'static {
@@ -38,6 +42,23 @@ pub trait ParallelStream: Sized + Send + Sync + Unpin + 'static {
         Fut: Future<Output = T> + Send,
     {
         Map::new(self, f)
+    }
+
+    /// A stream that yields two streams simultaneously
+    fn zip<S, T>(self, other: T) -> Zip<Self, <T as IntoParallelStream>::IntoParStream>
+    where
+        Self: Sized,
+        T: IntoParallelStream,
+    {
+        Zip::new(self, other.into_par_stream())
+    }
+
+    /// A stream that yields a current count and element
+    fn enumerate<S, T>(self) -> Enumerate<Self>
+    where
+        Self: Sized,
+    {
+        Enumerate::new(self)
     }
 
     /// Applies `f` to each item of this stream in parallel, producing a new
