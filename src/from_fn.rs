@@ -37,7 +37,7 @@ where
         let sender = sender.clone();
         while let Some(val) = f().await {
             sender.send(val).await;
-        };
+        }
     });
     FromFn {
         f,
@@ -70,15 +70,22 @@ where
     }
 }
 
-// #[async_std::test]
-// async fn smoke() {
-//     let mut output = vec![];
-    
-//     let mut stream = crate::from_fn(|| async move {
-//        Some(1u8)
-//     });
-//     while let Some(n) = stream.next().await {
-//         output.push(n);
-//     }
-//     assert_eq!(output, vec![1u8]);
-// }
+#[async_std::test]
+async fn smoke() {
+    let mut output = vec![];
+    let mut count = 0u8;
+    let mut stream = crate::from_fn(move || {
+        count += 1;
+        async move {
+            if count <= 3 {
+                Some(count)
+            } else {
+                None
+            }
+        }
+    });
+    while let Some(n) = stream.next().await {
+        output.push(n);
+    }
+    assert_eq!(output, vec![1, 2, 3]);
+}
