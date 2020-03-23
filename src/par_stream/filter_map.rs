@@ -61,16 +61,15 @@ impl<T: Send + 'static> ParallelStream for FilterMap<T> {
 
 #[async_std::test]
 async fn smoke() {
-    let s = async_std::stream::from_iter(vec![1,2,1,2,1,2]);
-    let mut output : Vec<usize> = vec![];
-    let mut stream = crate::from_stream(s)
-        .filter_map(|n| async move {
-            if n%2 == 0 {
-                Some(n)
-            } else {
-                None
-            }
-        });
+    let s = async_std::stream::from_iter(vec![1, 2, 1, 2, 1, 2]);
+    let mut output: Vec<usize> = vec![];
+    let mut stream = crate::from_stream(s).filter_map(|n| async move {
+        if n % 2 == 0 {
+            Some(n)
+        } else {
+            None
+        }
+    });
     while let Some(n) = stream.next().await {
         output.push(n);
     }
