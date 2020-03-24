@@ -1,7 +1,7 @@
+use async_std::sync::{self, Receiver};
+use async_std::task;
 use core::pin::Pin;
 use core::task::{Context, Poll};
-
-use async_std::task::ready;
 use pin_project_lite::pin_project;
 
 use crate::ParallelStream;
@@ -12,42 +12,43 @@ pin_project! {
     /// This `struct` is created by the [`skip`] method on [`ParallelStream`]. See its
     /// documentation for more.
     ///
-    /// [`skip`]: trait.ParallelStream.html#method.take
+    /// [`skip`]: trait.ParallelStream.html#method.skip
     /// [`ParallelStream`]: trait.ParallelStream.html
     #[derive(Clone, Debug)]
-    pub struct Skip<S> {
+    pub struct Skip<T> {
         #[pin]
-        stream: S,
-        skipped: usize,
+        receiver: Receiver<T>,
         limit: Option<usize>,
     }
 }
 
-impl<S: ParallelStream> Skip<S> {
-    pub(super) fn new(stream: S, skipped: usize) -> Self {
-        Self {
-            limit: stream.get_limit(),
-            skipped,
-            stream,
-        }
+impl<T: Send + 'static> Skip<T> {
+    pub(super) fn new<S>(mut stream: S, mut skipped: usize) -> Self
+    where
+        S: ParallelStream
+    {
+        let limit = stream.get_limit();
+        let (sender, receiver) = sync::channel(1);
+        task::spawn(async move {
+            while let Some(val) = stream.next().await {
+                if skipped == 0 {
+                    sender.send(val).await
+                } else {
+                    skipped -= 1;
+                }
+            }
+        });
+
+        Skip { limit, receiver }
     }
 }
 
-impl<S: ParallelStream> ParallelStream for Skip<S> {
-    type Item = S::Item;
+impl<T: Send + 'static> ParallelStream for Skip<T> {
+    type Item = T;
 
-    fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<S::Item>> {
+    fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         let this = self.project();
-        if *this.skipped > 0 {
-            let next = ready!(this.stream.poll_next(cx));
-            match next {
-                Some(_) => *this.skipped -= 1,
-                None => *this.skipped = 0,
-            }
-            Poll::Ready(next)
-        } else {
-            Poll::Ready(None)
-        }
+        this.receiver.poll_next(cx)
     }
 
     fn limit(mut self, limit: impl Into<Option<usize>>) -> Self {
@@ -62,10 +63,9 @@ impl<S: ParallelStream> ParallelStream for Skip<S> {
 
 #[async_std::test]
 async fn smoke() {
-    use async_std::prelude::*;
-    let s = async_std::stream::from_iter(vec![1, 2, 3, 4, 5, 6]).skip(3);
+    let s = async_std::stream::from_iter(vec![1, 2, 3, 4, 5, 6]);
     let mut output = vec![];
-    let mut stream = crate::from_stream(s);
+    let mut stream = crate::from_stream(s).skip(3);
     while let Some(n) = stream.next().await {
         output.push(n);
     }
