@@ -5,11 +5,13 @@ use std::pin::Pin;
 
 use crate::FromParallelStream;
 
+pub use filter::Filter;
 pub use for_each::ForEach;
 pub use map::Map;
 pub use next::NextFuture;
 pub use take::Take;
 
+mod filter;
 mod for_each;
 mod map;
 mod next;
@@ -38,6 +40,17 @@ pub trait ParallelStream: Sized + Send + Sync + Unpin + 'static {
         Fut: Future<Output = T> + Send,
     {
         Map::new(self, f)
+    }
+
+    /// Applies `f` to each item of this stream in parallel, producing a new
+    /// stream with items filtered.
+    fn filter<F, Fut>(self, f: F) -> Filter<Self>
+    where
+        F: FnMut(&Self::Item) -> Fut + Send + Sync + Copy + 'static,
+        Fut: Future<Output = bool> + Send,
+        Self::Item: Sync,
+    {
+        Filter::new(self, f)
     }
 
     /// Applies `f` to each item of this stream in parallel, producing a new
