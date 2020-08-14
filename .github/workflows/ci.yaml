@@ -31,13 +31,7 @@ jobs:
       uses: actions-rs/cargo@v1
       with:
         command: check
-        args: --all --bins --examples
-
-    - name: check unstable
-      uses: actions-rs/cargo@v1
-      with:
-        command:  check
-        args: --all --benches --bins --examples --tests
+        args: --all --bins --examples --benches --tests
 
     - name: tests
       uses: actions-rs/cargo@v1
@@ -58,6 +52,10 @@ jobs:
 
     - name: fmt
       run: cargo fmt --all -- --check
+
+    - name: clippy
+      run: cargo clippy
+
 
     - name: Docs
       run: cargo doc
