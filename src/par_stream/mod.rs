@@ -5,11 +5,13 @@ use std::pin::Pin;
 
 use crate::FromParallelStream;
 
+pub use find_map::FindMap;
 pub use for_each::ForEach;
 pub use map::Map;
 pub use next::NextFuture;
 pub use take::Take;
 
+mod find_map;
 mod for_each;
 mod map;
 mod next;
@@ -28,6 +30,17 @@ pub trait ParallelStream: Sized + Send + Sync + Unpin + 'static {
 
     /// Get the max concurrency limit
     fn get_limit(&self) -> Option<usize>;
+
+    /// Applies `f` to each item of this stream in parallel, producing a new
+    /// stream with the results.
+    fn find_map<F, T, Fut>(self, f: F) -> FindMap<T>
+    where
+        F: FnMut(Self::Item) -> Fut + Send + Sync + Copy + 'static,
+        T: Send + 'static,
+        Fut: Future<Output = Option<T>> + Send,
+    {
+        FindMap::new(self, f)
+    }
 
     /// Applies `f` to each item of this stream in parallel, producing a new
     /// stream with the results.
