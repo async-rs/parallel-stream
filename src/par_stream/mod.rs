@@ -5,11 +5,13 @@ use std::pin::Pin;
 
 use crate::FromParallelStream;
 
+pub use filter_map::FilterMap;
 pub use for_each::ForEach;
 pub use map::Map;
 pub use next::NextFuture;
 pub use take::Take;
 
+mod filter_map;
 mod for_each;
 mod map;
 mod next;
@@ -38,6 +40,19 @@ pub trait ParallelStream: Sized + Send + Sync + Unpin + 'static {
         Fut: Future<Output = T> + Send,
     {
         Map::new(self, f)
+    }
+
+    /// Applies `f` to each item of this stream in parallel, where `f` returns
+    /// an Future<Output = Option<T>>. If the future yields a None the item is
+    /// dropped, if the future yields a Some(T), T is added to the new stream of
+    /// results
+    fn filter_map<F, T, Fut>(self, f: F) -> FilterMap<T>
+    where
+        F: FnMut(Self::Item) -> Fut + Send + Sync + Copy + 'static,
+        T: Send + 'static,
+        Fut: Future<Output = Option<T>> + Send,
+    {
+        FilterMap::new(self, f)
     }
 
     /// Applies `f` to each item of this stream in parallel, producing a new
