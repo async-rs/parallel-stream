@@ -5,11 +5,13 @@ use std::pin::Pin;
 
 use crate::FromParallelStream;
 
+pub use any::Any;
 pub use for_each::ForEach;
 pub use map::Map;
 pub use next::NextFuture;
 pub use take::Take;
 
+mod any;
 mod for_each;
 mod map;
 mod next;
@@ -61,6 +63,15 @@ pub trait ParallelStream: Sized + Send + Sync + Unpin + 'static {
         Fut: Future<Output = ()> + Send,
     {
         ForEach::new(self, f)
+    }
+
+    /// Applies `f` to each item of this stream in parallel and returns true if at least one element satisfies `f`.
+    fn any<F, Fut>(self, f: F) -> Any
+    where
+        F: FnMut(Self::Item) -> Fut + Send + Sync + Copy + 'static,
+        Fut: Future<Output = bool> + Send,
+    {
+        Any::new(self, f)
     }
 
     /// Transforms a stream into a collection.
