@@ -1,6 +1,6 @@
 // use async_std::prelude::*;
+use async_std::channel::{self, Receiver};
 use async_std::future::Future;
-use async_std::sync::{self, Receiver};
 use async_std::task;
 
 use std::pin::Pin;
@@ -26,7 +26,7 @@ impl<T: Send + 'static> Map<T> {
         F: FnMut(S::Item) -> Fut + Send + Sync + Copy + 'static,
         Fut: Future<Output = T> + Send,
     {
-        let (sender, receiver) = sync::channel(1);
+        let (sender, receiver) = channel::bounded(1);
         let limit = stream.get_limit();
         task::spawn(async move {
             while let Some(item) = stream.next().await {

@@ -1,5 +1,5 @@
+use async_std::channel::{self, Receiver, Sender};
 use async_std::prelude::*;
-use async_std::sync::{self, Receiver, Sender};
 use async_std::task::{self, Context, Poll};
 
 use std::pin::Pin;
@@ -32,7 +32,7 @@ impl ForEach {
     {
         let exhausted = Arc::new(AtomicBool::new(false));
         let ref_count = Arc::new(AtomicU64::new(0));
-        let (sender, receiver): (Sender<()>, Receiver<()>) = sync::channel(1);
+        let (sender, receiver): (Sender<()>, Receiver<()>) = channel::bounded(1);
         let _limit = stream.get_limit();
 
         // Initialize the return type here to prevent borrowing issues.

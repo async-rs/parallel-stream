@@ -94,7 +94,7 @@ async fn smoke() {
     while let Some(n) = stream.next().await {
         out.push(n);
     }
-    out.sort();
+    out.sort_unstable();
 
     assert_eq!(out, vec![1usize, 4, 9, 16]);
 }
