@@ -18,7 +18,7 @@ async fn is_send() {
         let v: Vec<usize> = vec![1, 2, 3, 4];
         let stream = v.into_par_stream().map(|n| async move { n * n });
         let mut res = Vec::from_par_stream(stream).await;
-        res.sort();
+        res.sort_unstable();
         assert_eq!(res, vec![1, 4, 9, 16]);
     })
     .await;
