@@ -33,7 +33,7 @@ impl<T: Send + 'static> Map<T> {
                 let sender = sender.clone();
                 task::spawn(async move {
                     let res = f(item).await;
-                    sender.send(res).await;
+                    sender.send(res).await.expect("message failed to send");
                 });
             }
         });

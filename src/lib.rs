@@ -42,7 +42,7 @@
 
 #![forbid(unsafe_code)]
 #![deny(missing_debug_implementations, nonstandard_style)]
-#![warn(missing_docs, missing_doc_code_examples)]
+#![warn(missing_docs)]
 
 mod from_parallel_stream;
 mod from_stream;

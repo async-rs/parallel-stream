@@ -57,7 +57,7 @@ impl ForEach {
                     // Wake up the receiver if we know we're done.
                     ref_count.fetch_sub(1, Ordering::SeqCst);
                     if exhausted.load(Ordering::SeqCst) && ref_count.load(Ordering::SeqCst) == 0 {
-                        sender.send(()).await;
+                        sender.send(()).await.expect("message failed to send");
                     }
                 });
             }
