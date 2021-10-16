@@ -9,11 +9,13 @@ pub use for_each::ForEach;
 pub use map::Map;
 pub use next::NextFuture;
 pub use take::Take;
+pub use skip::Skip;
 
 mod for_each;
 mod map;
 mod next;
 mod take;
+mod skip;
 
 /// Parallel version of the standard `Stream` trait.
 pub trait ParallelStream: Sized + Send + Sync + Unpin + 'static {
@@ -52,6 +54,14 @@ pub trait ParallelStream: Sized + Send + Sync + Unpin + 'static {
         Self: Sized,
     {
         Take::new(self, n)
+    }
+
+    /// Creates a stream that skips the first `n` elements.
+    fn skip(self, n: usize) -> Skip<Self> 
+     where 
+        Self: Sized 
+    {
+        Skip::new(self, n)
     }
 
     /// Applies `f` to each item of this stream in parallel.
